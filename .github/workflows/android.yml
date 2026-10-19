@@ -23,6 +23,11 @@ jobs:
         with:
           flutter-version: '3.47.7'
 
+      - name: Create local.properties
+        run: |
+          echo "flutter.sdk=$FLUTTER_ROOT" > android/local.properties
+          cat android/local.properties
+
       - name: Get dependencies
         run: flutter pub get
 
