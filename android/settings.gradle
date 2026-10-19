@@ -1,13 +1,4 @@
 pluginManagement {
-    def flutterPluginPath = "$flutterRoot/packages/flutter_tools/gradle/plugin.properties"
-    properties {
-        def propertiesFile = new File(flutterPluginPath)
-        if (propertiesFile.exists()) {
-            propertiesFile.withReader('UTF-8') { reader ->
-                properties.load(reader)
-            }
-        }
-    }
     repositories {
         google()
         mavenCentral()
@@ -24,6 +15,14 @@ dependencyResolutionManagement {
 }
 
 include ':app'
+
+def localProperties = new Properties()
+def localPropertiesFile = rootProject.file('local.properties')
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.withReader('UTF-8') { reader ->
+        localProperties.load(reader)
+    }
+}
 
 def flutterRoot = localProperties?.getProperty('flutter.sdk')
 if (flutterRoot == null) {
