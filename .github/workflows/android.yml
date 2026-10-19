@@ -23,7 +23,19 @@ jobs:
         with:
           flutter-version: '3.47.7'
 
-      - name: Regenerate Android project (Flutter create)
+      - name: Install Android SDK Command-line Tools
+        run: |
+          mkdir -p $HOME/android-sdk
+          cd $HOME/android-sdk
+          wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -o cmdline-tools.zip
+          unzip -q cmdline-tools.zip
+          mkdir -p cmdline-tools/latest
+          mv cmdline-tools/* cmdline-tools/latest/ 2>/dev/null || true
+          echo "ANDROID_SDK_ROOT=$HOME/android-sdk" >> $GITHUB_ENV
+          echo "$HOME/android-sdk/cmdline-tools/latest/bin" >> $GITHUB_PATH
+          yes | sdkmanager --sdk_root=$HOME/android-sdk --install "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+
+      - name: Regenerate Android project
         run: flutter create --overwrite . --platforms android
 
       - name: Get dependencies
