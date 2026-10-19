@@ -1,0 +1,33 @@
+include ':app'
+
+def flutterRoot = localProperties?.getProperty('flutter.sdk')
+if (flutterRoot == null) {
+    throw new GradleException("Flutter SDK not found. Define location with flutter.sdk in the local.properties file.")
+}
+
+apply from: "$flutterRoot/packages/flutter_tools/gradle/settings.gradle"
+
+pluginManagement {
+    def flutterPluginPath = "$flutterRoot/packages/flutter_tools/gradle/plugin.properties"
+    properties {
+        def propertiesFile = new File(flutterPluginPath)
+        if (propertiesFile.exists()) {
+            propertiesFile.withReader('UTF-8') { reader ->
+                properties.load(reader)
+            }
+        }
+    }
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
