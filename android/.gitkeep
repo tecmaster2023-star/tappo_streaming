@@ -1,3 +1,0 @@
-# GitHub Actions para Tappo Streaming
-# Workflow que gera APK no CI usando flutter create
-# Nao edite android/ manualmente - eles sao regenerados automaticamente

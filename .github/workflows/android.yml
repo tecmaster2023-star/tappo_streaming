@@ -23,6 +23,23 @@ jobs:
         with:
           flutter-version: '3.47.7'
 
+      - name: Backup pubspec.yaml e lib/
+        run: |
+          cp pubspec.yaml pubspec.yaml.bak
+          cp -r lib lib.bak
+
+      - name: Remover android/ e ios/ existentes
+        run: rm -rf android ios
+
+      - name: Regenerar projeto Flutter Android
+        run: flutter create --overwrite . --platforms android
+
+      - name: Restaurar pubspec.yaml e lib/
+        run: |
+          cp pubspec.yaml.bak pubspec.yaml
+          rm -rf lib
+          cp -r lib.bak lib
+
       - name: Get dependencies
         run: flutter pub get
 
