@@ -25,13 +25,15 @@ jobs:
 
       - name: Install Android SDK Command-line Tools
         run: |
-          mkdir -p $HOME/android-sdk/cmdline-tools/latest
+          sudo apt-get update -qq && sudo apt-get install -y -qq unzip wget
+          mkdir -p $HOME/android-sdk/cmdline-tools
           cd $HOME/android-sdk
           wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O cmdline-tools.zip
-          unzip -q -o cmdline-tools.zip -d cmdline-tools/latest --strip-components=1
-          rm cmdline-tools.zip
+          unzip -q -o cmdline-tools.zip -d cmdline-tools
+          mv cmdline-tools/cmdline-tools/* cmdline-tools/ 2>/dev/null || true
+          rm -rf cmdline-tools/cmdline-tools cmdline-tools.zip
           echo "ANDROID_SDK_ROOT=$HOME/android-sdk" >> $GITHUB_ENV
-          echo "$HOME/android-sdk/cmdline-tools/latest/bin" >> $GITHUB_PATH
+          echo "$HOME/android-sdk/cmdline-tools/bin" >> $GITHUB_PATH
           yes | sdkmanager --sdk_root=$HOME/android-sdk --install "platform-tools" "platforms;android-34" "build-tools;34.0.0" > /dev/null 2>&1
 
       - name: Accept Android licenses
@@ -42,12 +44,6 @@ jobs:
 
       - name: Regenerate Flutter Android project
         run: flutter create --overwrite . --platforms android
-
-      - name: Restore Dart code and assets
-        run: |
-          cp -r /home/runner/work/tappo_streaming/tappo_streaming/lib_backup/* lib/ 2>/dev/null || true
-          cp -r /home/runner/work/tappo_streaming/tappo_streaming/assets_backup/* assets/ 2>/dev/null || true
-        # O código Dart já está no checkout, não precisa restaurar
 
       - name: Get dependencies
         run: flutter pub get
