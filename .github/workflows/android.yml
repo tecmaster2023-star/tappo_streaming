@@ -23,7 +23,7 @@ jobs:
         with:
           flutter-version: '3.47.7'
 
-      - name: Flutter doctor (diagnostico)
+      - name: Flutter doctor
         run: flutter doctor -v
 
       - name: Install Android SDK Command-line Tools
@@ -41,9 +41,6 @@ jobs:
 
       - name: Accept Android licenses
         run: yes | sdkmanager --sdk_root=$HOME/android-sdk --licenses > /dev/null 2>&1
-
-      - name: Remove conflicting native folders
-        run: rm -rf android ios
 
       - name: Regenerate Flutter Android project
         run: flutter create --overwrite . --platforms android
