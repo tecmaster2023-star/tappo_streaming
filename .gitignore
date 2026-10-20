@@ -30,3 +30,7 @@ Thumbs.db
 # Environment
 .env
 .env.*
+
+# Arquivos nativos gerados automaticamente pelo flutter create - NAO versionar
+android/
+ios/
