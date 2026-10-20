@@ -25,18 +25,29 @@ jobs:
 
       - name: Install Android SDK Command-line Tools
         run: |
-          mkdir -p $HOME/android-sdk
+          mkdir -p $HOME/android-sdk/cmdline-tools/latest
           cd $HOME/android-sdk
-          wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -o cmdline-tools.zip
-          unzip -q cmdline-tools.zip
-          mkdir -p cmdline-tools/latest
-          mv cmdline-tools/* cmdline-tools/latest/ 2>/dev/null || true
+          wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O cmdline-tools.zip
+          unzip -q -o cmdline-tools.zip -d cmdline-tools/latest --strip-components=1
+          rm cmdline-tools.zip
           echo "ANDROID_SDK_ROOT=$HOME/android-sdk" >> $GITHUB_ENV
           echo "$HOME/android-sdk/cmdline-tools/latest/bin" >> $GITHUB_PATH
-          yes | sdkmanager --sdk_root=$HOME/android-sdk --install "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+          yes | sdkmanager --sdk_root=$HOME/android-sdk --install "platform-tools" "platforms;android-34" "build-tools;34.0.0" > /dev/null 2>&1
 
-      - name: Regenerate Android project
+      - name: Accept Android licenses
+        run: yes | sdkmanager --sdk_root=$HOME/android-sdk --licenses > /dev/null 2>&1
+
+      - name: Remove old Android project files
+        run: rm -rf android ios
+
+      - name: Regenerate Flutter Android project
         run: flutter create --overwrite . --platforms android
+
+      - name: Restore Dart code and assets
+        run: |
+          cp -r /home/runner/work/tappo_streaming/tappo_streaming/lib_backup/* lib/ 2>/dev/null || true
+          cp -r /home/runner/work/tappo_streaming/tappo_streaming/assets_backup/* assets/ 2>/dev/null || true
+        # O código Dart já está no checkout, não precisa restaurar
 
       - name: Get dependencies
         run: flutter pub get
