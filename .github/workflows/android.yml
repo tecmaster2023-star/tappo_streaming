@@ -8,6 +8,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -18,43 +20,47 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.47.7'
+          cache: true
 
-      - name: Backup pubspec.yaml e lib/
+      - name: Backup pubspec.yaml and lib/
         run: |
           cp pubspec.yaml pubspec.yaml.bak
           cp -r lib lib.bak
 
-      - name: Instalar Android SDK
-        run: |
-          sudo apt-get update -qq && sudo apt-get install -y -qq unzip wget
-          mkdir -p $HOME/android-sdk/cmdline-tools
-          cd $HOME/android-sdk
-          wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O cmdline-tools.zip
-          unzip -q -o cmdline-tools.zip -d cmdline-tools
-          mv cmdline-tools/cmdline-tools/* cmdline-tools/ 2>/dev/null || true
-          rm -rf cmdline-tools/cmdline-tools cmdline-tools.zip
-          echo "ANDROID_SDK_ROOT=$HOME/android-sdk" >> $GITHUB_ENV
-          echo "$HOME/android-sdk/cmdline-tools/bin" >> $GITHUB_PATH
-          yes | sdkmanager --sdk_root=$HOME/android-sdk --install "platform-tools" "platforms;android-34" "build-tools;34.0.0" > /dev/null 2>&1
-
-      - name: Aceitar licenças Android
-        run: yes | sdkmanager --sdk_root=$HOME/android-sdk --licenses > /dev/null 2>&1
-
-      - name: Remover android/ e ios/ existentes
+      - name: Remove old native folders
         run: rm -rf android ios
 
-      - name: Regenerar projeto Android com Flutter
+      - name: Regenerate Flutter Android project
         run: flutter create --overwrite . --platforms android
 
-      - name: Restaurar pubspec.yaml e lib/ (código do Tappo Streaming)
+      - name: Restore pubspec.yaml and lib/
         run: |
           cp pubspec.yaml.bak pubspec.yaml
           rm -rf lib
           cp -r lib.bak lib
+
+      - name: Install NDK with retry
+        run: |
+          for attempt in 1 2 3; do
+            echo "NDK install attempt $attempt..."
+            if yes | sdkmanager --install "ndk;28.2.13676358"; then
+              echo "NDK installed successfully"
+              break
+            fi
+            echo "Attempt $attempt failed, retrying in 15s..."
+            sleep 15
+          done
+        continue-on-error: true
+
+      - name: Prevent Gradle from downloading SDKs
+        run: echo "android.builder.sdkDownload=false" >> android/gradle.properties
 
       - name: Get dependencies
         run: flutter pub get
